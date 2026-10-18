@@ -1,0 +1,3 @@
+# Keep line endings consistent between Windows and macOS/Linux
+* text=auto eol=lf
+*.hocon text eol=lf

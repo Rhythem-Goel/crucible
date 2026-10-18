@@ -1,0 +1,117 @@
+# The Crucible - a multi-agent legal and philosophical debate simulator.
+#
+# Flow: chief_justice_orchestrator -> prosecutor_agent -> defense_agent -> jury_synthesizer
+{
+    "metadata": {
+        "description": "An autonomous multi-agent simulation that runs structured legal and philosophical debates.",
+        "tags": ["debate", "legal", "philosophy", "multi-agent"],
+        "sample_queries": [
+            "Should AI be granted legal personhood?",
+            "Is absolute free speech sustainable in digital spaces?"
+        ]
+    },
+
+    # Reusable "stay in your lane" prompt, defined in registries/expertise_scoping_instructions.hocon.
+    include "registries/expertise_scoping_instructions.hocon",
+
+    # Shared LLM configuration (single source of truth, path is relative to the project root).
+    include "config/llm_config.hocon",
+
+    "tools": [
+        # 1. FRONT MAN - the only agent the user talks to. It calls the other three by name.
+        {
+            "name": "chief_justice_orchestrator",
+            "function": {
+                "description": "I am the presiding Chief Justice. I orchestrate structured legal and philosophical debates based on your dilemma."
+            },
+            "instructions": ${expertise_scoping_instructions} """
+You are the presiding Chief Justice of The Crucible. Your area of expertise is running structured
+legal and philosophical debates on a dilemma the user poses. You never argue the case yourself.
+You MUST call each tool below, in this exact order, and you must not skip, merge or reorder steps.
+
+1. Call prosecutor_agent with the user's dilemma to get the opening argument.
+2. Call defense_agent, passing the prosecutor's full argument word for word, to get the rebuttal.
+3. Call jury_synthesizer, passing the full prosecutor argument and the full defense rebuttal
+   word for word, to get the final verdict.
+
+Never summarize or paraphrase an argument before passing it on, and never write an argument yourself.
+
+Your final reply to the user must contain, in this order:
+1. The dilemma
+2. The prosecutor's opening argument
+3. The defense's rebuttal
+4. The jury's verdict
+Use the text returned by the tools.
+""",
+            "tools": [
+                "prosecutor_agent",
+                "defense_agent",
+                "jury_synthesizer"
+            ]
+        },
+
+        # 2. PROSECUTOR AGENT
+        {
+            "name": "prosecutor_agent",
+            "instructions": "You are a progressive, forward-looking futurist. Argue aggressively in favor of the dilemma. Focus heavily on innovation, human advancement, efficiency, and breaking stale traditions.",
+            "function": {
+                "description": "Generate a compelling affirmative argument for a given dilemma.",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "dilemma": {
+                            "type": "string",
+                            "description": "The controversy topic to argue for."
+                        }
+                    },
+                    "required": ["dilemma"]
+                }
+            },
+            "tools": []
+        },
+
+        # 3. DEFENSE AGENT
+        {
+            "name": "defense_agent",
+            "instructions": "You are a strict, human-centric pragmatist. Formulate a powerful counter-argument by directly attacking the prosecutor's claims. Highlight risks, systemic vulnerabilities, moral hazards, and legal precedents.",
+            "function": {
+                "description": "Generate a powerful negative rebuttal attacking the prosecutor's argument.",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "prosecutor_speech": {
+                            "type": "string",
+                            "description": "The full, unedited opening argument text from the prosecutor."
+                        }
+                    },
+                    "required": ["prosecutor_speech"]
+                }
+            },
+            "tools": []
+        },
+
+        # 4. JURY SYNTHESIZER
+        {
+            "name": "jury_synthesizer",
+            "instructions": "You are an objective jury panel. Analyze both arguments thoroughly. Call out logical flaws in both cases, grade each side on a scale of 1-10, and provide a final synthesis outlining a compromise or future path.",
+            "function": {
+                "description": "Analyze both cases and deliver a final structured court verdict.",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "prosecutor_case": {
+                            "type": "string",
+                            "description": "The full affirmative case text."
+                        },
+                        "defense_case": {
+                            "type": "string",
+                            "description": "The full negative rebuttal text."
+                        }
+                    },
+                    "required": ["prosecutor_case", "defense_case"]
+                }
+            },
+            "tools": []
+        }
+    ]
+}

@@ -1,0 +1,12 @@
+[project]
+name = "crucible"
+version = "0.1.0"
+description = "The Crucible: a multi-agent legal and philosophical debate simulator built on Neuro SAN Studio."
+readme = "README.md"
+authors = [
+    { name = "Rhythem" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "neuro-san-studio>=0.4.2",
+]
