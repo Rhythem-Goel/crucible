@@ -33,7 +33,7 @@ backend code.
 | `defense_agent` | Human-centric pragmatist. Attacks the prosecutor's claims: risks, moral hazards, legal precedent. |
 | `jury_synthesizer` | Objective jury. Finds logical flaws in both cases, grades each side 1-10, and proposes a compromise or path forward. |
 
-See [architecture.md](architecture.md) for the call sequence and design notes.
+See [architecture.md](architecture.md) for the call sequence and design notes, and [summary.md](summary.md) for a project overview.
 
 ## Example dilemmas
 
@@ -43,17 +43,21 @@ See [architecture.md](architecture.md) for the call sequence and design notes.
 ## Prerequisites
 
 - Python 3.12 or newer (Neuro SAN Studio requires it)
-- [uv](https://docs.astral.sh/uv/getting-started/installation/)
 - An [OpenRouter API key](https://openrouter.ai/keys)
 
 ## Setup
 
 ```bash
-git clone <this-repo-url>
+git clone https://github.com/Rhythem-Goel/crucible.git
 cd crucible
 
-# install dependencies into .venv
-uv sync
+# create and activate a virtual environment
+python -m venv .venv
+source .venv/bin/activate        # macOS / Linux
+# .venv\Scripts\activate         # Windows
+
+# install dependencies
+pip install -r requirements.txt
 ```
 
 Create your `.env` from the template and add your key:
@@ -80,26 +84,26 @@ To use a different model, change it there. Every agent picks it up.
 Check that your key and config work:
 
 ```bash
-uv run ns check-llm-keys
-uv run ns check-config
-uv run ns validate registries/the_crucible.hocon
+ns check-llm-keys
+ns check-config
+ns validate registries/the_crucible.hocon
 ```
 
 Chat with the network straight from the terminal (no server and no UI needed):
 
 ```bash
-uv run ns chat the_crucible
+ns chat the_crucible
 ```
 
-Run `uv run ns chat --help` for other options, such as one-shot mode.
+Run `ns chat --help` for other options, such as one-shot mode.
 
 Optional: start the Neuro SAN server on its own (it listens on `localhost:8080`):
 
 ```bash
-uv run ns run --server-only
+ns run --server-only
 ```
 
-`uv run ns run` without flags also launches the `nsflow` developer UI at http://localhost:4173/,
+`ns run` without flags also launches the `nsflow` developer UI at http://localhost:4173/,
 which is handy for watching the agents hand work to each other, but it is not required.
 
 ## Project structure
@@ -109,22 +113,25 @@ crucible/
 ├── config/
 │   ├── llm_config.hocon     # Shared LLM settings (one place to change the model)
 │   └── plugins.hocon        # Neuro SAN plugins (logging bridge, optional Phoenix tracing)
-├── mcp/
-│   └── mcp_info.hocon       # MCP tool list created by `ns init` (not used by this network)
 ├── registries/
 │   ├── manifest.hocon       # Tells the server which networks to serve
 │   ├── the_crucible.hocon   # The four-agent network definition
 │   └── expertise_scoping_instructions.hocon  # Shared prompt that keeps the Chief Justice on topic
 ├── .env.example             # Template for your API key
+├── requirements.txt         # Python dependencies
 ├── architecture.md          # Call sequence and design notes
-├── pyproject.toml
-└── uv.lock
+├── summary.md               # Project summary
+└── README.md                # This file
 ```
 
 ## Troubleshooting
 
 **`OPENROUTER_API_KEY` not found.** Make sure `.env` exists in the project root and contains the key.
-Run `uv run ns check-llm-keys` to verify.
+Run `ns check-llm-keys` to verify.
+
+**`No module named 'langchain_openrouter'` (shown in the chat or logs).** The OpenRouter integration
+is missing from your environment. Run `pip install -r requirements.txt` again, or
+`pip install langchain-openrouter`.
 
 **`cannot import name 'eager_task_factory' from 'asyncio'`.** You are on Python 3.11 or older.
 Use Python 3.12+.

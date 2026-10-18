@@ -53,7 +53,7 @@ diagrams.
 - **Single model setting.** Every agent includes `config/llm_config.hocon`, so the model is changed
   in one place.
 - **No frontend or backend.** As the hackathon allowed, the project runs from the command line
-  (`uv run ns chat the_crucible`). The optional `nsflow` developer UI that ships with Neuro SAN can
+  (`ns chat the_crucible`). The optional `nsflow` developer UI that ships with Neuro SAN can
   show the agents handing work to each other, but it is not required.
 
 ## 5. Design decisions
@@ -71,10 +71,11 @@ prompt short and lets the jury evaluate arguments it did not write.
 ## 6. Running it
 
 ```bash
-uv sync
+python -m venv .venv && source .venv/bin/activate   # Windows: .venv\Scripts\activate
+pip install -r requirements.txt
 cp .env.example .env        # add your OpenRouter key (Windows: Copy-Item)
-uv run ns validate registries/the_crucible.hocon
-uv run ns chat the_crucible
+ns validate registries/the_crucible.hocon
+ns chat the_crucible
 ```
 
 Example dilemmas: "Should AI be granted legal personhood?" and "Is absolute free speech sustainable
